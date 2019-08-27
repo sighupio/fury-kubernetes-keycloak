@@ -7,7 +7,7 @@ The keycloak high availabilty cluster will be form by all the `keycloak-{number}
 ## Requirements
 
 - `kustomize >= 1.0.10`
-- `keycloak > 6.0` (also tested with `Keycloak 4.8.2.Final` see [notes](#considerations-for-keycloak-4.8.2.final) for this case below)
+- `keycloak > 7.0` (also tested with `Keycloak 4.8.2.Final` see [notes](#considerations-for-keycloak-4.8.2.final) for this case below)
 - `kubernetes >= 1.12`
 
 ## Folder structure
