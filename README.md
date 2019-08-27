@@ -2,7 +2,7 @@
 
 This repository has all the files needed to deploy RedHat's Keycloak in a High Availability cluster.
 
-This will deploy by default on the `keycloak` namespace. The keycloak high availabilty cluster will be form by all the `keycloak-number` pods in the namespace.
+The keycloak high availabilty cluster will be form by all the `keycloak-{number}` pods in the namespace.
 
 ## Requirements
 
