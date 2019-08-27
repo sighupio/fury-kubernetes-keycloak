@@ -1,0 +1,8 @@
+resources:
+        - rbac.yaml
+        - deploy.yaml
+
+configMapGenerator:
+  - name: cloud-xml
+    files:
+      - cloud-keycloak.xml

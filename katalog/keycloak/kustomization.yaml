@@ -1,0 +1,9 @@
+
+resources:
+- base.yml
+- rbac.yaml
+
+configMapGenerator:
+  - name: cache-owners
+    files:
+    - cache-owners.cli

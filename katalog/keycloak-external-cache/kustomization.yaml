@@ -1,0 +1,12 @@
+
+bases:
+  - ../keycloak
+  - ../infinispan
+
+patches:
+  - external-cache.yml
+
+configMapGenerator:
+  - name: remote-infinispan
+    files:
+    - remote-infinispan.cli

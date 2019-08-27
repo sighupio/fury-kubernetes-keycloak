@@ -1,0 +1,107 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: keycloak
+spec:
+  replicas: 1
+  serviceName: keycloak-discovery
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      restartPolicy: Always
+      serviceAccountName: keycloak
+      containers:
+      - image: jboss/keycloak
+        imagePullPolicy: Always
+        name: keycloak
+        volumeMounts:
+        - name: cache-owners
+          subPath: cache-owners.cli
+          mountPath: /opt/jboss/startup-scripts/cache-owners.cli
+        env:      
+          - name: KEYCLOAK_USER
+            value: "admin"
+          - name: KEYCLOAK_PASSWORD
+            value: "admin"
+          - name: KUBERNETES_LABELS
+            value: app=keycloak
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: JGROUPS_DISCOVERY_PROTOCOL
+            value: kubernetes.KUBE_PING
+          - name: JGROUPS_DISCOVERY_PROPERTIES
+            value: "namespace=$(KUBERNETES_NAMESPACE)"
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: JAVA_OPTS
+            value: >-
+              -server
+              -Djava.net.preferIPv4Stack=true
+              -Djava.awt.headless=true
+              -Djboss.default.jgroups.stack=kubernetes
+              -Djboss.node.name=$(POD_NAME)
+              -Djboss.tx.node.id=$(POD_NAME)
+              -Djboss.site.name=$(KUBERNETES_NAMESPACE)
+        resources:
+          requests:
+            memory: 100M
+            cpu: 250m
+          # limits:
+          #   memory: 1G
+          #   cpu: 500m
+        livenessProbe:
+          httpGet:
+            path: auth/
+            port: http
+          initialDelaySeconds: 140
+        readinessProbe:
+          httpGet:
+            path: auth/realms/master
+            port: http
+          initialDelaySeconds: 140
+        ports:
+          - name: http
+            containerPort: 8080
+            protocol: TCP
+      volumes:
+      - name: cache-owners
+        configMap:
+          name: cache-owners
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: http
+  selector:
+    app: keycloak-http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-discovery
+  labels:
+    app: keycloak
+spec:
+  clusterIP: None
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: http
+  selector:
+    app: keycloak
