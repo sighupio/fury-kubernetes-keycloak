@@ -26,9 +26,9 @@ The keycloak high availabilty cluster will be form by all the `keycloak-{number}
 
 ## Configuration
 
-Keycloak will be deployed wit the following configuration:
+Keycloak will be deployed with the following configuration:
 - A "keycloak" `StatefulSet` with `1` replica.
-- A "keycloak-discovery" `head-less service` for the StatefulSet.
+- A "keycloak-discovery" `headless service` for the StatefulSet.
 - A "keycloak-http" `Service` that exposes port `tcp/8080` to access keycloak itself.
 - A "keycloak" `ServiceAccount` with `list` and `get` permissions on the namespace's `pods` resource. This service account is needed in order to use the `KUBE_PING` JGroups discovery method.
 - Default credentials to access the admin console:
@@ -95,9 +95,9 @@ See the [official documentation for more details](https://hub.docker.com/r/jboss
 > ⚠️ If you not set an external database, keycloak will default to a `H2` local instance on every pod. This means that it will not be syncronized between the different keycloak pods.
 
 
-- Set the `CACHE_OWNERS` environment variable, the default value is `1`. This value sets the amount of copys that you want to have of each keycloak's cache. If you have it set to 1, and a pods dies, you'll lose that cache contents.
+- Set the `CACHE_OWNERS` environment variable, the default value is `1`. This value sets the amount of copies that you want to have of each keycloak's cache. If you have it set to 1, and a pods dies, you'll lose that cache contents.
 
-- The default value for the `liveness` and `readyness` probes is 140 seconds. It could be that your keycloak takes more time to boot up, adjust the values accordingly to your environment.
+- The default value for the `liveness` and `readiness` probes is 140 seconds. It could be that your keycloak takes more time to boot up, adjust the values accordingly to your environment.
 
 ## Considerations for Keycloak 4.8.2.Final
 
@@ -130,7 +130,7 @@ So the patch will look like something like this:
 
 > ⚠️ Have in mind that `kustomize` doesn't support expanding environment variables with `$(VARNAME)` when the variable has been defined in another `yaml` file. So you need to redefine locally every `$(VAR)` you want to expand, like `$(POD_NAME)` and `$(KUBERNETES_NAMESPACE)` in the previous example.
 
-> The `JAVA_OPTS` environment variable has to be setup *in every namespace*, this is because at the moment of writing this module, the `Wildfly`  application server that keycloak uses doesn't support extending this environment variable with something like `EXT_JAVA_OPTS`. So, in order to add specific variables to each namespace, we need to repeat ourselves. This can be improved though.
+> The `JAVA_OPTS` environment variable has to be set *in every namespace*, this is because at the moment of writing this module, the `Wildfly` application server that keycloak uses doesn't support extending this environment variable with something like `EXT_JAVA_OPTS`. So, in order to add specific variables to each namespace, we need to repeat ourselves. This can be improved though.
 
 
 ### Database configuration
@@ -182,7 +182,7 @@ Set the `-Dremote.cache.host` parameter to point to the hot-rod port of your inf
 ## Infinispan
 Besides Keycloak, an additional `infinispan` cluster will be deployed:
 - An "infinispan-server" `StatefulSet` with `1` replica.
-- An "infinispan-headless" `head-less service` for the StatefulSet.
+- An "infinispan-headless" `headless service` for the StatefulSet.
 - An "infinispan-http" `Service` that exposes port `tcp/8080` to access infinispan itself.
 - An "infinispan-server-hotrod" `Service` that exposes port `tcp/11222` to access infinispan hot rod protocol.
 - An "infinispan" `ServiceAccount` with `list` and `get` permissions on the namespace's `pods` resource. This service account is needed in order to use the `KUBE_PING` JGroups discovery method.
