@@ -27,13 +27,14 @@ The keycloak high availabilty cluster will be form by all the `keycloak-{number}
 ## Configuration
 
 Keycloak will be deployed with the following configuration:
+
 - A "keycloak" `StatefulSet` with `1` replica.
 - A "keycloak-discovery" `headless service` for the StatefulSet.
 - A "keycloak-http" `Service` that exposes port `tcp/8080` to access keycloak itself.
 - A "keycloak" `ServiceAccount` with `list` and `get` permissions on the namespace's `pods` resource. This service account is needed in order to use the `KUBE_PING` JGroups discovery method.
 - Default credentials to access the admin console:
-  + Username: `admin`
-  + Password: `admin`
+  - Username: `admin`
+  - Password: `admin`
 
   You probably want to change them, make an overlay of the following environment variables:
 
@@ -76,7 +77,7 @@ spec:
 ```
 
 - You should use an external database, for example PostgreSQL, to store the persistent data. You can configure Keycloak to use the database setting the following environment variables:
- 
+
 ```yaml
           - name: DB_ADDR
             value: "postgres"
@@ -94,10 +95,15 @@ See the [official documentation for more details](https://hub.docker.com/r/jboss
 
 > ⚠️ If you not set an external database, keycloak will default to a `H2` local instance on every pod. This means that it will not be syncronized between the different keycloak pods.
 
-
 - Set the `CACHE_OWNERS` environment variable, the default value is `1`. This value sets the amount of copies that you want to have of each keycloak's cache. If you have it set to 1, and a pods dies, you'll lose that cache contents.
 
 - The default value for the `liveness` and `readiness` probes is 140 seconds. It could be that your keycloak takes more time to boot up, adjust the values accordingly to your environment.
+
+- Make sure the ingress you are using forwards the `X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers and preserving the original `Host` HTTP header. For example, the `nginx-ingress-controller` from versions `0.22.0` and later has this disabled by default, add this to the `data` field of the ingress `configMap` to enable it:
+
+```yaml
+use-forwarded-headers: "true"
+```
 
 ## Considerations for Keycloak 4.8.2.Final
 
