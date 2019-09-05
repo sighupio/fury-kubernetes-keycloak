@@ -53,7 +53,7 @@ Beacuse we want to use the pod's name as the value for `jboss.node.name` and `jb
 
 - Set the `replicas` count to your desired number using an overlay.
 
-- It is strongly recommended to use sticky sessions in your ingress definition for keycloak. The `cookie` to use is `AUTH_SESSION_ID`. See example below:
+- It is strongly recommended to use sticky sessions in your ingress definition for keycloak. **DO NOT** use the cookie `AUTH_SESSION_ID`, because it conflicts with the underlaying `mod_cluster`. We recommend setting it to something else like `INGRESS_SESSION_ID`. See example below:
 
 ```yaml
 ---
@@ -63,7 +63,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "external"
     nginx.ingress.kubernetes.io/affinity: "cookie"
-    nginx.ingress.kubernetes.io/session-cookie-name: "AUTH_SESSION_ID"
+    nginx.ingress.kubernetes.io/session-cookie-name: "INGRESS_SESSION_ID"
   name: keycloak-external
 spec:
   rules:
