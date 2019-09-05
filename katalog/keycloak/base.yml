@@ -40,6 +40,8 @@ spec:
               fieldRef:
                 apiVersion: v1
                 fieldPath: metadata.name
+          - name: PROXY_ADDRESS_FORWARDING
+            value: "true"
           - name: JAVA_OPTS
             value: >-
               -server
