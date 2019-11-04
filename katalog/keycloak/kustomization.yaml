@@ -7,3 +7,7 @@ configMapGenerator:
   - name: cache-owners
     files:
     - cache-owners.cli
+
+images:
+  - name: jboss/keycloak
+    newTag: 7.0.1
