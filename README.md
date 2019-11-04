@@ -18,9 +18,9 @@ The keycloak high availabilty cluster will be form by all the `keycloak-{number}
 
 ## Packages
 
-- **[keycloak](#keycloak)**: high availability keycloak using native Kubernetes namespace based discovery. This will form a keycloak cluster where the members will be all the keycloaks pods in the same kubernetes namespace.
+- **[keycloak](#keycloak)**: high availability keycloak using native Kubernetes namespace based discovery. This will form a keycloak cluster where the members will be all the keycloaks pods in the same kubernetes namespace. Version: **latest**.
 - **[keycloak-external-cache](#keycloak-external-cache)**: high availability keycloak using native kubernetes namespace discovery and an external infinispan cache cluster for multisite deployments.
-- **[infinispan](#infinispan)**: an Infinispan cache cluster deployment, to be used by `keycloak-external-cache`.
+- **[infinispan](#infinispan)**: an Infinispan cache cluster deployment, to be used by `keycloak-external-cache`. Version: **9.3.1.Final**.
 
 # Keycloak
 
