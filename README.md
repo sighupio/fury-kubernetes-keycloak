@@ -22,6 +22,16 @@ The keycloak high availabilty cluster will be form by all the `keycloak-{number}
 - **[keycloak-external-cache](#keycloak-external-cache)**: high availability keycloak using native kubernetes namespace discovery and an external infinispan cache cluster for multisite deployments.
 - **[infinispan](#infinispan)**: an Infinispan cache cluster deployment, to be used by `keycloak-external-cache`. Version: **9.3.1.Final**.
 
+## Compatibility
+
+| Module Version / Kubernetes Version | 1.14.X             | 1.15.X             | 1.16.X             |
+|-------------------------------------|:------------------:|:------------------:|:------------------:|
+| v1.0.0                              |                    |                    |                    |
+
+- :white_check_mark: Compatible
+- :warning: Has issues
+- :x: Incompatible
+
 # Keycloak
 
 ## Configuration
