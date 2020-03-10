@@ -105,6 +105,8 @@ See the [official documentation for more details](https://hub.docker.com/r/jboss
 
 > ⚠️ If you not set an external database, keycloak will default to a `H2` local instance on every pod. This means that it will not be syncronized between the different keycloak pods.
 
+> ⚠️ On some cases, the Java Virtual Machine (JVM) is configure by default to cache DNS name lookups **forever** instead of following the record's TTL. This could be problematic in cases where Keycloak should contact endpoints that have "dynamic" DNS entries, for example AWS' RDS endpoint. In order to disable the infit cache, you need to pass the `-Dnetworkaddress.cache.ttl=60` flag to the JVM. Where `60` is the TTL in seconds you want to use. You can add it to the `JAVA_OPTS` environment variable.
+
 - Set the `CACHE_OWNERS` environment variable, the default value is `1`. This value sets the amount of copies that you want to have of each keycloak's cache. If you have it set to 1, and a pods dies, you'll lose that cache contents.
 
 - The default value for the `liveness` and `readiness` probes is 140 seconds. It could be that your keycloak takes more time to boot up, adjust the values accordingly to your environment.
