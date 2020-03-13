@@ -11,5 +11,9 @@ echo * Setting CACHE_OWNERS to "${env.CACHE_OWNERS}" in all cache-containers
 /subsystem=infinispan/cache-container=keycloak/distributed-cache=offlineClientSessions:write-attribute(name=owners, value=${env.CACHE_OWNERS:1})
 /subsystem=infinispan/cache-container=keycloak/distributed-cache=loginFailures:write-attribute(name=owners, value=${env.CACHE_OWNERS:1})
 
+# Uncomment the following line if you are having infinispan timeout errors, this
+# will switch to TCP for the jgroups communication.
+# /subsystem=jgroups/channel=ee:write-attribute(name=stack, value=tcp)
+
 run-batch
 stop-embedded-server
