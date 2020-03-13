@@ -90,7 +90,7 @@ spec:
       protocol: TCP
       targetPort: http
   selector:
-    app: keycloak-http
+    app: keycloak
 ---
 apiVersion: v1
 kind: Service
