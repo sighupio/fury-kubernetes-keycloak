@@ -1,3 +1,7 @@
+# Copyright (c) 2021 SIGHUP s.r.l All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -12,15 +16,14 @@ roleRef:
   kind: ClusterRole
   name: view
 subjects:
-- kind: ServiceAccount
-  name: keycloak
+  - kind: ServiceAccount
+    name: keycloak
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: keycloak-viewer
 rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["list", "get"]
-  
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list", "get"]
