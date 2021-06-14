@@ -2,10 +2,9 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-
-bases:
-  - ../keycloak
-  - ../infinispan
+resources:
+  - ../../katalog/keycloak
+  - ./infinispan
 
 patches:
   - external-cache.yml
@@ -13,4 +12,4 @@ patches:
 configMapGenerator:
   - name: remote-infinispan
     files:
-    - remote-infinispan.cli
+      - remote-infinispan.cli

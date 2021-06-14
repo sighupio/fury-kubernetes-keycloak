@@ -60,8 +60,6 @@ trigger:
   ref:
     include:
       - refs/tags/**
-      # TO BE DELETED
-      - refs/heads/feature-add-test-and-upgrade
 
 depends_on:
   - policeman
@@ -156,8 +154,6 @@ trigger:
   ref:
     include:
       - refs/tags/**
-      # TO BE DELETED
-      - refs/heads/feature-add-test-and-upgrade
 
 depends_on:
   - policeman
@@ -252,8 +248,6 @@ trigger:
   ref:
     include:
       - refs/tags/**
-      # TO BE DELETED
-      - refs/heads/feature-add-test-and-upgrade
 
 depends_on:
   - policeman
@@ -348,8 +342,6 @@ trigger:
   ref:
     include:
       - refs/tags/**
-      # TO BE DELETED
-      - refs/heads/feature-add-test-and-upgrade
 
 depends_on:
   - policeman
@@ -431,3 +423,86 @@ steps:
 volumes:
 - name: shared
   temp: {}
+
+---
+kind: pipeline
+name: release
+
+depends_on:
+  - e2e-kubernetes-1.18
+  - e2e-kubernetes-1.19
+  - e2e-kubernetes-1.20
+
+platform:
+  os: linux
+  arch: amd64
+
+trigger:
+  ref:
+    include:
+      - refs/tags/**
+
+steps:
+  - name: prepare-tar-gz
+    image: alpine:latest
+    pull: always
+    depends_on: [ clone ]
+    commands:
+      - tar -zcvf fury-kubernetes-keycloak-${DRONE_TAG}.tar.gz katalog/ LICENSE README.md
+
+  - name: prepare-release-notes
+    image: quay.io/sighup/fury-release-notes-plugin:3.7_2.8.4
+    pull: always
+    depends_on: [ clone ]
+    settings:
+      release_notes_file_path: release-notes.md
+
+  - name: publish-prerelease
+    image: plugins/github-release
+    pull: always
+    depends_on:
+      - prepare-tar-gz
+      - prepare-release-notes
+    settings:
+      api_key:
+        from_secret: github_token
+      file_exists: overwrite
+      files:
+        - fury-kubernetes-keycloak-${DRONE_TAG}.tar.gz
+      prerelease: true
+      overwrite: true
+      title: "Preview ${DRONE_TAG}"
+      note: release-notes.md
+      checksum:
+        - md5
+        - sha256
+    when:
+      ref:
+        include:
+          - refs/tags/v**-rc**
+
+  - name: publish-stable
+    image: plugins/github-release
+    pull: always
+    depends_on:
+      - prepare-tar-gz
+      - prepare-release-notes
+    settings:
+      api_key:
+        from_secret: github_token
+      file_exists: overwrite
+      files:
+        - fury-kubernetes-keycloak-${DRONE_TAG}.tar.gz
+      prerelease: false
+      overwrite: true
+      title: "Release ${DRONE_TAG}"
+      note: release-notes.md
+      checksum:
+        - md5
+        - sha256
+    when:
+      ref:
+        exclude:
+          - refs/tags/v**-rc**
+        include:
+          - refs/tags/v**

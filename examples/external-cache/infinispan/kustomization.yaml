@@ -6,6 +6,13 @@ resources:
   - rbac.yaml
   - deploy.yaml
 
+images:
+  - name: busybox
+    newName: registry.sighup.io/fury/busybox
+  - name: jboss/infinispan-server
+    newName: registry.sighup.io/fury/jboss/infinispan-server
+    newTag: 9.3.1.Final
+
 configMapGenerator:
   - name: cloud-xml
     files:
