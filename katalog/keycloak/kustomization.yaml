@@ -13,4 +13,5 @@ configMapGenerator:
 
 images:
   - name: jboss/keycloak
+    newName: registry.sighup.io/fury/jboss/keycloak
     newTag: 7.0.1
