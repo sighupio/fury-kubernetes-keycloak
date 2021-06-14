@@ -2,7 +2,7 @@
 
 This repository has all the files needed to deploy RedHat's Keycloak in a High Availability cluster.
 
-The keycloak high availabilty cluster will be form by all the `keycloak-{number}` pods in the namespace.
+The keycloak high availability cluster will be form by all the `keycloak-{number}` pods in the namespace.
 
 ## Requirements
 
@@ -24,15 +24,13 @@ The keycloak high availabilty cluster will be form by all the `keycloak-{number}
 
 ## Compatibility
 
-| Module Version / Kubernetes Version | 1.14.X             | 1.15.X             | 1.16.X             |
-|-------------------------------------|:------------------:|:------------------:|:------------------:|
-| v1.0.0                              |                    |                    |                    |
+| Module Version / Kubernetes Version | 1.14.X | 1.15.X | 1.16.X |
+| ----------------------------------- | :----: | :----: | :----: |
+| v1.0.0                              |        |        |        |
 
 - :white_check_mark: Compatible
 - :warning: Has issues
 - :x: Incompatible
-
-# Keycloak
 
 ## Configuration
 
@@ -104,7 +102,6 @@ spec:
 See the [official documentation for more details](https://hub.docker.com/r/jboss/keycloak).
 
 > ⚠️ If you not set an external database, keycloak will default to a `H2` local instance on every pod. This means that it will not be syncronized between the different keycloak pods.
-
 > ⚠️ On some cases, the Java Virtual Machine (JVM) is configure by default to cache DNS name lookups **forever** instead of following the record's TTL. This could be problematic in cases where Keycloak should contact endpoints that have "dynamic" DNS entries, for example AWS' RDS endpoint. In order to disable the infit cache, you need to pass the `-Dnetworkaddress.cache.ttl=60` flag to the JVM. Where `60` is the TTL in seconds you want to use. You can add it to the `JAVA_OPTS` environment variable.
 
 - Set the `CACHE_OWNERS` environment variable, the default value is `1`. This value sets the amount of copies that you want to have of each keycloak's cache. If you have it set to 1, and a pods dies, you'll lose that cache contents.
@@ -147,7 +144,6 @@ So the patch will look like something like this:
 ```
 
 > ⚠️ Have in mind that `kustomize` doesn't support expanding environment variables with `$(VARNAME)` when the variable has been defined in another `yaml` file. So you need to redefine locally every `$(VAR)` you want to expand, like `$(POD_NAME)` and `$(KUBERNETES_NAMESPACE)` in the previous example.
-
 > The `JAVA_OPTS` environment variable has to be set *in every namespace*, this is because at the moment of writing this module, the `Wildfly` application server that keycloak uses doesn't support extending this environment variable with something like `EXT_JAVA_OPTS`. So, in order to add specific variables to each namespace, we need to repeat ourselves. This can be improved though.
 
 
@@ -174,15 +170,15 @@ The database configurations parameters are different, this are the ones to use f
 
 If you need to use Keycloak version `4.8.2.Final` or *older* you need to backport the startup scripts functionality. We have already done it, use the `Dockerfile` that is in the `docker` folder and set the version you want to start from to add the startup scripts feature, then build your image and use it for the StatefulSet.
 
-# Keycloak external cache
+## Keycloak external cache
 
-## Use case
+### Use case
 
-This type of deployment is for when you want to run Keycloak in a cluster across multiple data centers, most typically using data center sites that are in different geographic regions. When using this mode, each data center will have its own cluster of Keycloak servers. 
+This type of deployment is for when you want to run Keycloak in a cluster across multiple data centers, most typically using data center sites that are in different geographic regions. When using this mode, each data center will have its own cluster of Keycloak servers.
 
 Eache keycloak cluster connects to an infinispan server and this infinispan server is who sends data to the other cluster via a `hotrod` connection to the others cluster's infinispan.
 
-## Configuration
+### External cache configuration
 
 Keycloak will be deployed using the same configuration that for the high availability mode. With the addition of an init script and two more `JAVA_OPTS`:
 ```yaml
@@ -196,7 +192,7 @@ Set the `-Dremote.cache.host` parameter to point to the hot-rod port of your inf
 
 > ⚠️ The Infinispan cluster shall be up and running prior booting up Keycloak.
 
-## Infinispan
+### Infinispan
 
 Besides Keycloak, an additional `infinispan` cluster will be deployed:
 
