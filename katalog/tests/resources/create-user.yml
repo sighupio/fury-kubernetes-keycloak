@@ -1,0 +1,61 @@
+# Copyright (c) 2021 SIGHUP s.r.l All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: create-user-payload
+data:
+  create-user.json: '{"firstName":"no","lastName":"body", "email":"hello@sighup.io", "enabled":"true", "username":"hello"}'
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    run: create-user
+  name: create-user
+spec:
+  template:
+    metadata:
+      labels:
+        run: create-user
+    spec:
+      securityContext:
+        runAsUser: 0
+      initContainers:
+        - name: token
+          image: registry.sighup.io/fury/curlimages/curl:latest
+          command:
+            [
+              "sh",
+              "-c",
+              'apk add jq && curl -s -d "client_id=admin-cli" -d "username=admin" -d "password=admin" -d "grant_type=password" "http://keycloak:8080/auth/realms/master/protocol/openid-connect/token" | jq -r .access_token > /token/current',
+            ]
+          volumeMounts:
+            - mountPath: /token
+              name: token-volume
+      containers:
+        - name: create-user
+          command:
+            [
+              "sh",
+              "-c",
+              'curl --fail -s --location --request POST "http://keycloak:8080/auth/admin/realms/master/users" --header "Content-Type: application/json" --header "Authorization: Bearer $(cat /token/current)" --data "@/data/create-user-payload/create-user.json"',
+            ]
+          image: registry.sighup.io/fury/curlimages/curl:latest
+          resources: {}
+          volumeMounts:
+            - mountPath: /token
+              name: token-volume
+            - mountPath: /data/create-user-payload/create-user.json
+              subPath: create-user.json
+              name: payload
+      restartPolicy: OnFailure
+      volumes:
+        - name: token-volume
+          emptyDir: {}
+        - name: payload
+          configMap:
+            name: create-user-payload

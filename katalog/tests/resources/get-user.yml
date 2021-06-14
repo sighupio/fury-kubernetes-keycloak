@@ -1,0 +1,48 @@
+# Copyright (c) 2021 SIGHUP s.r.l All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    run: get-user
+  name: get-user
+spec:
+  template:
+    metadata:
+      labels:
+        run: get-user
+    spec:
+      securityContext:
+        runAsUser: 0
+      initContainers:
+        - name: token
+          image: registry.sighup.io/fury/curlimages/curl:latest
+          command:
+            [
+              "sh",
+              "-c",
+              'apk add jq && curl -s -d "client_id=admin-cli" -d "username=admin" -d "password=admin" -d "grant_type=password" "http://keycloak:8080/auth/realms/master/protocol/openid-connect/token" | jq -r .access_token > /token/current',
+            ]
+          volumeMounts:
+            - mountPath: /token
+              name: token-volume
+      containers:
+        - name: get-user
+          command:
+            [
+              "sh",
+              "-c",
+              'apk add jq && curl --fail -s --location "http://keycloak:8080/auth/admin/realms/master/users" --header "Authorization: Bearer $(cat /token/current)" | jq -e -c -r ".[] | select ( .username == \"hello\") "',
+            ]
+          image: registry.sighup.io/fury/curlimages/curl:latest
+          resources: {}
+          volumeMounts:
+            - mountPath: /token
+              name: token-volume
+      restartPolicy: OnFailure
+      volumes:
+        - name: token-volume
+          emptyDir: {}
