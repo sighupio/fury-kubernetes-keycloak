@@ -9,7 +9,7 @@ The following packages are included in the Fury Kubernetes KeyCloak Katalog.
 
 - **[keycloak](#keycloak)**: high availability KeyCloak using native Kubernetes namespace based discovery.
 This will form a KeyCloak cluster where the members will be all the KeyCloaks pods in the same Kubernetes namespace.
-Version: **7.0.1**.
+Version: **13.0.1**.
 
 ## Requirements
 
@@ -27,6 +27,7 @@ specific dependencies, please visit the single package's documentation:
 | ----------------------------------- | :----------------: | :----------------: | :----------------: | :-------: |
 | v1.0.0                              |                    |                    |                    |           |
 | v1.0.1                              | :white_check_mark: | :white_check_mark: | :white_check_mark: | :warning: |
+| v1.1.0                              | :white_check_mark: | :white_check_mark: | :white_check_mark: | :warning: |
 
 - :white_check_mark: Compatible
 - :warning: Has issues
