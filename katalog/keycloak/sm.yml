@@ -30,9 +30,6 @@ spec:
       scheme: http
       path: /metrics
   jobLabel: k8s-app
-  namespaceSelector:
-    matchNames:
-      - keycloak
   selector:
     matchLabels:
       app: keycloak
