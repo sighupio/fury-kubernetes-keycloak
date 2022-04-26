@@ -33,6 +33,10 @@ specific dependencies, please visit the single package's documentation:
 - :warning: Has issues
 - :x: Incompatible
 
+## Metrics
+
+The current package provides access to the metrics exposed by Keycloak, enabled using the env var `KEYCLOAK_STATISTICS=all`. Also, a ServiceMonitor is included, to be attached to [Prometheus Operator](https://github.com/sighupio/fury-kubernetes-monitoring/tree/master/katalog/prometheus-operator).
+
 ## Examples
 
 To see examples on how to customize Fury Kubernetes KeyCloak packages, please
