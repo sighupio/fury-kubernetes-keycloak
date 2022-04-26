@@ -9,6 +9,7 @@ metadata:
   name: keycloak-metrics
   labels:
     app: keycloak
+    component: metrics
 spec:
   selector:
     app: keycloak
@@ -33,3 +34,4 @@ spec:
   selector:
     matchLabels:
       app: keycloak
+      component: metrics
