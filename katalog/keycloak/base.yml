@@ -45,6 +45,8 @@ spec:
               value: "admin"
             - name: KEYCLOAK_PASSWORD
               value: "admin"
+            - name: KEYCLOAK_STATISTICS
+              value: "all"
             - name: KUBERNETES_LABELS
               value: app=keycloak
             - name: KUBERNETES_NAMESPACE
@@ -92,6 +94,8 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+            - name: metrics
+              containerPort: 9990
       volumes:
         - name: cache-owners
           configMap:

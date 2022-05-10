@@ -7,6 +7,7 @@ modern applications and services.
   - [Configuration](#configuration)
     - [Default Credentials](#default-credentials)
     - [Why a StatefulSet?](#why-a-statefulset)
+    - [Metrics](#metrics)
     - [Recommendations](#recommendations)
       - [Replicas](#replicas)
       - [Sticky Sessions](#sticky-sessions)
@@ -46,6 +47,10 @@ You probably want to change them, make an overlay of the following environment v
 Because we want to use the pod's name as the value for `jboss.node.name` and `jboss.tx.node.id`,
 and both have a hard limit of 27 characters. A podname with the deployment hash has more than 27 characters,
 so we use an StatefulSet instead to control the name's length.
+
+### Metrics
+
+The current package provides access to the metrics exposed by Keycloak, enabled using the env var `KEYCLOAK_STATISTICS=all`. Also, a ServiceMonitor is included, to be attached to [Prometheus Operator](https://github.com/sighupio/fury-kubernetes-monitoring/tree/master/katalog/prometheus-operator).
 
 ### Recommendations
 
