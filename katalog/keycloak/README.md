@@ -7,13 +7,13 @@ modern applications and services.
   - [Configuration](#configuration)
     - [Default Credentials](#default-credentials)
     - [Why a StatefulSet?](#why-a-statefulset)
+    - [Custom Docker image](#custom-docker-image)
     - [Metrics](#metrics)
     - [Recommendations](#recommendations)
       - [Replicas](#replicas)
       - [Sticky Sessions](#sticky-sessions)
       - [Database](#database)
       - [DNS caching](#dns-caching)
-      - [Cache configuration](#cache-configuration)
       - [Liveness And Readiness probes](#liveness-and-readiness-probes)
       - [Be aware of proxy headers](#be-aware-of-proxy-headers)
   - [License](#license)
@@ -24,7 +24,7 @@ KeyCloak ships with the following options:
 
 - A "keycloak" `StatefulSet` with `1` replica.
 - A "keycloak-discovery" `headless service` for the StatefulSet.
-- A "keycloak-http" `Service` exposing port `tcp/8080` to access KeyCloak itself.
+- A "keycloak" `Service` exposing port `tcp/8080` to access KeyCloak itself.
 - A "keycloak" `ServiceAccount` with `list` and `get` permissions on the namespace's `pods` resource.
 This service account is needed to use the `KUBE_PING` JGroups discovery method.
 - Default credentials to access the admin console:
@@ -33,24 +33,36 @@ This service account is needed to use the `KUBE_PING` JGroups discovery method.
 
 ### Default Credentials
 
-You probably want to change them, make an overlay of the following environment variables:
+You probably want to change them, create a secret named `keycloak-initial-admin` in the same namespace where you deployed keycloak. For example:
 
 ```yaml
-          - name: KEYCLOAK_USER
-            value: "admin"
-          - name: KEYCLOAK_PASSWORD
-            value: "admin"
+apiVersion: v1
+kind: Secret
+stringData:
+  password: <your_password>
+  username: <your_username>
+metadata:
+  labels:
+    app: keycloak
+  name: keycloak-initial-admin
+  namespace: keycloak
+type: kubernetes.io/basic-auth
+
 ```
 
 ### Why a StatefulSet?
 
-Because we want to use the pod's name as the value for `jboss.node.name` and `jboss.tx.node.id`,
-and both have a hard limit of 27 characters. A podname with the deployment hash has more than 27 characters,
-so we use an StatefulSet instead to control the name's length.
+Because we want to use the pod's name as the value for keycloak node name and both have a hard limit of 27 characters. 
+A podname with the deployment hash has more than 27 characters, so we use an StatefulSet instead to control the name's length.
+
+### Custom Docker image
+
+The Docker image used in this package has been built from [Fury images](https://github.com/sighupio/fury-images/blob/master/keycloak/Dockerfile) installing the [Keycloak Metrics SPI](https://github.com/aerogear/keycloak-metrics-spi), so Keycloak metrics about internal events are exposed to `/realms/master/metrics`.
+
 
 ### Metrics
 
-The current package provides access to the metrics exposed by Keycloak, enabled using the env var `KEYCLOAK_STATISTICS=all`. Also, a ServiceMonitor is included, to be attached to [Prometheus Operator](https://github.com/sighupio/fury-kubernetes-monitoring/tree/master/katalog/prometheus-operator).
+The current package provides access to the core metrics exposed to `/metrics` by Keycloak, enabled using the env var `KC_METRICS_ENABLED=true`. Also, a ServiceMonitor is included, to be attached to [Prometheus Operator](https://github.com/sighupio/fury-kubernetes-monitoring/tree/master/katalog/prometheus-operator).
 
 ### Recommendations
 
@@ -90,19 +102,21 @@ You should use an external database, for example PostgreSQL, to store the persis
 You can configure Keycloak to use the database setting the following environment variables:
 
 ```yaml
-          - name: DB_ADDR
-            value: "postgres"
-          - name: DB_PORT
-            value: "5432"
-          - name: DB_DATABASE
-            value: "keycloak"
-          - name: DB_USER
-            value: "keycloak"
-          - name: DB_PASSWORD
-            value: "password"
+        - name: KC_DB
+          value: "<database_vendor>"
+        - name: KC_DB_PASSWORD
+          value: "<database_password>"
+        - name: KC_DB_USERNAME
+          value: "<database_username>"
+        - name: KC_DB_URL_DATABASE
+          value: "<database_name>"
+        - name: KC_DB_URL_HOST
+          value: "<database_host>"
+        - name: KC_DB_URL_PORT
+          value: "<database_port>"
 ```
 
-See the [official documentation for more details](https://hub.docker.com/r/jboss/keycloak).
+See the [official documentation for more details](https://www.keycloak.org/server/all-config#_database).
 
 ⚠️ If you don't set an external database, keycloak will default to a `H2` local instance on every pod.
 This means that it will not be syncronized between the different keycloak pods.
@@ -115,16 +129,10 @@ that have "dynamic" DNS entries, for example AWS' RDS endpoint. In order to disa
 pass the `-Dnetworkaddress.cache.ttl=60` flag to the JVM. Where `60` is the TTL in seconds you want to use.
 You can add it to the `JAVA_OPTS` environment variable.
 
-#### Cache configuration
-
-Set the `CACHE_OWNERS` environment variable, the default value is `1`. This value sets the number of copies that you
-want to have of each keycloak's cache. If you have it set to 1, and a pods dies, you'll lose that cache contents.
-
 #### Liveness And Readiness probes
 
-The default value for the `liveness` and `readiness` probes is 140 seconds. It could be that your keycloak takes
+The default value for the `liveness probe` is 150 seconds and `readiness probe` is 250 seconds. It could be that your keycloak takes
 more time to boot up; adjust the values accordingly to your environment.
-
 
 #### Be aware of proxy headers
 
