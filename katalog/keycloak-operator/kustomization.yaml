@@ -1,0 +1,20 @@
+# Copyright (c) 2017-present SIGHUP s.r.l All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - crds/keycloakrealmimports.k8s.keycloak.org-v1.yml
+  - crds/keycloaks.k8s.keycloak.org-v1.yml
+  - keycloak-operator.yml
+
+patchesStrategicMerge:
+  - patches/keycloak-image.yml
+
+images:
+  - name: quay.io/keycloak/keycloak-operator
+    newName: registry.sighup.io/fury/keycloak/keycloak-operator
+    newTag: 21.1.1

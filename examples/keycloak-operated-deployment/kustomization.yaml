@@ -1,0 +1,11 @@
+namespace: keycloak
+
+resources:
+- ../../katalog/keycloak-operator
+- ../../katalog/keycloak-operated
+- resources/ns.yml
+- resources/postgres-keycloak.yml
+- resources/keycloak-db-secret.yml
+
+patchesStrategicMerge:
+- patches/keycloak.yml

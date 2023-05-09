@@ -1,0 +1,38 @@
+# Copyright (c) 2017-present SIGHUP s.r.l All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: keycloak
+  labels:
+    app.kubernetes.io/name: keycloak
+spec:
+  endpoints:
+    - interval: 10s
+      port: http
+      scheme: http
+      path: /metrics
+  selector:
+    matchLabels:
+      app: keycloak
+      component: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: keycloak-metrics-spi
+  labels:
+    app.kubernetes.io/name: keycloak
+spec:
+  endpoints:
+    - interval: 10s
+      port: http
+      scheme: http
+      path: /realms/master/metrics
+  selector:
+    matchLabels:
+      app: keycloak
+      component: metrics
+---
