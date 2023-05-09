@@ -7,6 +7,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: create-user-payload
+  namespace: keycloak
 data:
   create-user.json: '{"firstName":"no","lastName":"body", "email":"hello@sighup.io", "enabled":"true", "username":"hello"}'
 ---
@@ -16,6 +17,7 @@ metadata:
   labels:
     run: create-user
   name: create-user
+  namespace: keycloak
 spec:
   template:
     metadata:
@@ -31,18 +33,24 @@ spec:
             [
               "sh",
               "-c",
-              'apk add jq && curl -s -d "client_id=admin-cli" -d "username=admin" -d "password=admin" -d "grant_type=password" "http://keycloak:8080/auth/realms/master/protocol/openid-connect/token" | jq -r .access_token > /token/current',
+              'apk add jq && curl -d "client_id=admin-cli" -d "username=admin" -d "password=${KEYCLOAK_PASSWORD}" -d "grant_type=password" "http://keycloak-service:8080/realms/master/protocol/openid-connect/token" | jq -r .access_token > /token/current',
             ]
           volumeMounts:
             - mountPath: /token
               name: token-volume
+          env:
+            - name: KEYCLOAK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: keycloak-initial-admin
       containers:
         - name: create-user
           command:
             [
               "sh",
               "-c",
-              'curl --fail -s --location --request POST "http://keycloak:8080/auth/admin/realms/master/users" --header "Content-Type: application/json" --header "Authorization: Bearer $(cat /token/current)" --data "@/data/create-user-payload/create-user.json"',
+              'curl --fail --location --request POST "http://keycloak-service:8080/admin/realms/master/users" --header "Content-Type: application/json" --header "Authorization: Bearer $(cat /token/current)" --data "@/data/create-user-payload/create-user.json"',
             ]
           image: registry.sighup.io/fury/curlimages/curl:latest
           resources: {}

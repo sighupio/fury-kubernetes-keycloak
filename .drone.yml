@@ -28,54 +28,78 @@ steps:
     image: quay.io/sighup/policeman
     pull: always
     environment:
-      VALIDATE_BASH: "false"
+      # Identifies false positives like missing 'selector'. On Kustomize is common to don't set them
+      VALIDATE_KUBERNETES_KUBEVAL: "false"
+      # We use a lot of copy paste in our code, is intended. So it important to don't use this linter
+      VALIDATE_JSCPD: "false"
+      VALIDATE_TERRAFORM_TFLINT: "false"
+      # hadolint already validated dockerfiles
+      VALIDATE_DOCKERFILE: "false"
+      VALIDATE_NATURAL_LANGUAGE: "false"
     depends_on:
       - clone
 
   - name: render
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.9.4_1.18.19_3.8.7_2.4.1
+    image: quay.io/sighup/e2e-testing:1.1.0_0.7.0_3.1.1_1.9.4_1.21.12_3.8.7_4.21.1
     pull: always
     depends_on:
       - clone
     commands:
-      - kustomize build katalog/keycloak > keycloak.yml
+      - kustomize build katalog/keycloak-operated > keycloak-operated.yml
+      - kustomize build katalog/keycloak-operator > keycloak-operator.yml
 
-  - name: deprek8ion
-    image: eu.gcr.io/swade1987/deprek8ion:1.1.34
+  - &check-deprecated-apis
+    name: check-deprecated-apis-keycloak-operated
+    image: us-docker.pkg.dev/fairwinds-ops/oss/pluto:v5
     pull: always
     depends_on:
       - render
     commands:
-      - /conftest test -p /policies keycloak.yml
+      # we use --ignore-deprecations because we don't want the CI to fail when the API has not been removed yet.
+      - /pluto detect $${KUBERNETES_MANIFESTS} --ignore-deprecations --target-versions=k8s=v1.25.0
+    environment:
+      KUBERNETES_MANIFESTS: keycloak-operated.yml
+
+  - <<: *check-deprecated-apis
+    name: check-deprecated-apis-keycloak-operator
+    environment:
+      KUBERNETES_MANIFESTS: keycloak-operator.yml
 
 ---
+name: e2e-kubernetes-1.23
 kind: pipeline
-name: e2e-kubernetes-1.18
+type: docker
+
+depends_on:
+  - policeman
 
 platform:
   os: linux
   arch: amd64
 
+node:
+  runner: internal
+
 trigger:
   ref:
     include:
+      - refs/heads/main
+      - refs/heads/release-v*
       - refs/tags/**
-
-depends_on:
-  - policeman
 
 steps:
   - name: init
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.11.0
+    image: quay.io/sighup/e2e-testing-drone-plugin:v1.24.1
     pull: always
     volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ clone ]
+      - name: shared
+        path: /shared
+    depends_on: [clone]
     settings:
-      action: cluster-118
-      pipeline_id: cluster-118
-      cluster_version: '1.18.19'
+      action: custom-cluster-123
+      cluster_version: "1.23.6"
+      local_kind_config_path: katalog/tests/kind-config.yml
+      pipeline_id: cluster-123
       instance_path: /shared
       aws_default_region:
         from_secret: aws_region
@@ -96,25 +120,25 @@ steps:
       dockerhub_password:
         from_secret: dockerhub_password
 
-  - name: test
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.9.4_1.18.19_3.8.7_2.4.1
+  - name: e2e
+    image: quay.io/sighup/e2e-testing:1.1.0_0.7.0_3.1.1_1.9.4_1.23.6_3.8.7_4.21.1
     pull: always
     volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ init ]
+      - name: shared
+        path: /shared
+    depends_on: [init]
     commands:
-      - export KUBECONFIG=/shared/kube/kubeconfig-118
+      - export KUBECONFIG=/shared/kube/kubeconfig-123
       - bats -t katalog/tests/deploy-keycloak.sh
       - bats -t katalog/tests/test-users-keycloak.sh
 
   - name: destroy
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.11.0
+    image: quay.io/sighup/e2e-testing-drone-plugin:v1.24.1
     pull: always
-    depends_on: [ test ]
+    depends_on: [e2e]
     settings:
       action: destroy
-      pipeline_id: cluster-118
+      pipeline_id: cluster-123
       aws_default_region:
         from_secret: aws_region
       aws_access_key_id:
@@ -135,16 +159,23 @@ steps:
         from_secret: dockerhub_password
     when:
       status:
-      - success
-      - failure
+        - success
+        - failure
 
 volumes:
-- name: shared
-  temp: {}
+  - name: shared
+    temp: {}
 
 ---
+name: e2e-kubernetes-1.24
 kind: pipeline
-name: e2e-kubernetes-1.19
+type: docker
+
+depends_on:
+  - policeman
+
+node:
+  runner: internal
 
 platform:
   os: linux
@@ -153,23 +184,23 @@ platform:
 trigger:
   ref:
     include:
+      - refs/heads/main
+      - refs/heads/release-v*
       - refs/tags/**
-
-depends_on:
-  - policeman
 
 steps:
   - name: init
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.11.0
+    image: quay.io/sighup/e2e-testing-drone-plugin:v1.24.1
     pull: always
     volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ clone ]
+      - name: shared
+        path: /shared
+    depends_on: [clone]
     settings:
-      action: cluster-119
-      pipeline_id: cluster-119
-      cluster_version: '1.19.11'
+      action: custom-cluster-124
+      cluster_version: "1.24.0"
+      local_kind_config_path: katalog/tests/kind-config.yml
+      pipeline_id: cluster-124
       instance_path: /shared
       aws_default_region:
         from_secret: aws_region
@@ -190,25 +221,25 @@ steps:
       dockerhub_password:
         from_secret: dockerhub_password
 
-  - name: test
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.9.4_1.19.11_3.8.7_2.4.1
+  - name: e2e
+    image: quay.io/sighup/e2e-testing:1.1.0_0.7.0_3.1.1_1.9.4_1.24.0_3.8.7_4.21.1
     pull: always
     volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ init ]
+      - name: shared
+        path: /shared
+    depends_on: [init]
     commands:
-      - export KUBECONFIG=/shared/kube/kubeconfig-119
+      - export KUBECONFIG=/shared/kube/kubeconfig-124
       - bats -t katalog/tests/deploy-keycloak.sh
       - bats -t katalog/tests/test-users-keycloak.sh
 
   - name: destroy
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.11.0
+    image: quay.io/sighup/e2e-testing-drone-plugin:v1.24.1
     pull: always
-    depends_on: [ test ]
+    depends_on: [e2e]
     settings:
       action: destroy
-      pipeline_id: cluster-119
+      pipeline_id: cluster-124
       aws_default_region:
         from_secret: aws_region
       aws_access_key_id:
@@ -229,16 +260,22 @@ steps:
         from_secret: dockerhub_password
     when:
       status:
-      - success
-      - failure
+        - success
+        - failure
 
 volumes:
-- name: shared
-  temp: {}
-
+  - name: shared
+    temp: {}
 ---
+name: e2e-kubernetes-1.25
 kind: pipeline
-name: e2e-kubernetes-1.20
+type: docker
+
+depends_on:
+  - policeman
+
+node:
+  runner: internal
 
 platform:
   os: linux
@@ -247,23 +284,23 @@ platform:
 trigger:
   ref:
     include:
+      - refs/heads/main
+      - refs/heads/release-v*
       - refs/tags/**
-
-depends_on:
-  - policeman
 
 steps:
   - name: init
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.11.0
+    image: quay.io/sighup/e2e-testing-drone-plugin:v1.25.3
     pull: always
     volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ clone ]
+      - name: shared
+        path: /shared
+    depends_on: [clone]
     settings:
-      action: cluster-120
-      pipeline_id: cluster-120
-      cluster_version: '1.20.7'
+      action: custom-cluster-125
+      cluster_version: "1.25.3"
+      local_kind_config_path: katalog/tests/kind-config.yml
+      pipeline_id: cluster-125
       instance_path: /shared
       aws_default_region:
         from_secret: aws_region
@@ -284,25 +321,26 @@ steps:
       dockerhub_password:
         from_secret: dockerhub_password
 
-  - name: test
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.9.4_1.20.7_3.8.7_2.4.1
+  - name: e2e
+    # KUBECTL 1.25.3 - KUSTOMIZE 3.5.3 - HELM 3.1.1 - YQ 4.21.1 - ISTIOCTL 1.9.4 - FURYCTL 0.9.0 - BATS 1.1.0
+    image: quay.io/sighup/e2e-testing:1.1.0_0.9.0_3.1.1_1.9.4_1.25.3_3.5.3_4.21.1
     pull: always
     volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ init ]
+      - name: shared
+        path: /shared
+    depends_on: [init]
     commands:
-      - export KUBECONFIG=/shared/kube/kubeconfig-120
+      - export KUBECONFIG=/shared/kube/kubeconfig-125
       - bats -t katalog/tests/deploy-keycloak.sh
       - bats -t katalog/tests/test-users-keycloak.sh
 
   - name: destroy
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.11.0
+    image: quay.io/sighup/e2e-testing-drone-plugin:v1.25.3
     pull: always
-    depends_on: [ test ]
+    depends_on: [e2e]
     settings:
       action: destroy
-      pipeline_id: cluster-120
+      pipeline_id: cluster-125
       aws_default_region:
         from_secret: aws_region
       aws_access_key_id:
@@ -323,115 +361,21 @@ steps:
         from_secret: dockerhub_password
     when:
       status:
-      - success
-      - failure
+        - success
+        - failure
 
 volumes:
-- name: shared
-  temp: {}
-
----
-kind: pipeline
-name: e2e-kubernetes-1.21
-
-platform:
-  os: linux
-  arch: amd64
-
-trigger:
-  ref:
-    include:
-      - refs/tags/**
-
-depends_on:
-  - policeman
-
-steps:
-  - name: init
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.11.0
-    pull: always
-    volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ clone ]
-    settings:
-      action: cluster-121
-      pipeline_id: cluster-121
-      cluster_version: '1.21.1'
-      instance_path: /shared
-      aws_default_region:
-        from_secret: aws_region
-      aws_access_key_id:
-        from_secret: aws_access_key_id
-      aws_secret_access_key:
-        from_secret: aws_secret_access_key
-      terraform_tf_states_bucket_name:
-        from_secret: terraform_tf_states_bucket_name
-      vsphere_server:
-        from_secret: vsphere_server
-      vsphere_password:
-        from_secret: vsphere_password
-      vsphere_user:
-        from_secret: vsphere_user
-      dockerhub_username:
-        from_secret: dockerhub_username
-      dockerhub_password:
-        from_secret: dockerhub_password
-
-  - name: test
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.9.4_1.21.1_3.8.7_2.4.1
-    pull: always
-    volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ init ]
-    commands:
-      - export KUBECONFIG=/shared/kube/kubeconfig-121
-      - bats -t katalog/tests/deploy-keycloak.sh
-      - bats -t katalog/tests/test-users-keycloak.sh
-
-  - name: destroy
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.11.0
-    pull: always
-    depends_on: [ test ]
-    settings:
-      action: destroy
-      pipeline_id: cluster-121
-      aws_default_region:
-        from_secret: aws_region
-      aws_access_key_id:
-        from_secret: aws_access_key_id
-      aws_secret_access_key:
-        from_secret: aws_secret_access_key
-      terraform_tf_states_bucket_name:
-        from_secret: terraform_tf_states_bucket_name
-      vsphere_server:
-        from_secret: vsphere_server
-      vsphere_password:
-        from_secret: vsphere_password
-      vsphere_user:
-        from_secret: vsphere_user
-      dockerhub_username:
-        from_secret: dockerhub_username
-      dockerhub_password:
-        from_secret: dockerhub_password
-    when:
-      status:
-      - success
-      - failure
-
-volumes:
-- name: shared
-  temp: {}
+  - name: shared
+    temp: {}
 
 ---
 kind: pipeline
 name: release
 
 depends_on:
-  - e2e-kubernetes-1.18
-  - e2e-kubernetes-1.19
-  - e2e-kubernetes-1.20
+  - e2e-kubernetes-1.23
+  - e2e-kubernetes-1.24
+  - e2e-kubernetes-1.25
 
 platform:
   os: linux

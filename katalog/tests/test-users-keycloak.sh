@@ -10,7 +10,7 @@ load ./resources/helper
     info
     deploy() {
         kapply katalog/tests/resources/create-user.yml
-        kubectl wait --for=condition=complete job create-user --timeout=120s
+        kubectl wait --for=condition=complete job create-user --timeout=120s -n keycloak
     }
     run deploy
     [ "$status" -eq 0 ]
@@ -20,7 +20,7 @@ load ./resources/helper
     info
     deploy() {
         kapply katalog/tests/resources/get-user.yml
-        kubectl wait --for=condition=complete job get-user --timeout=120s
+        kubectl wait --for=condition=complete job get-user --timeout=120s -n keycloak
     }
     run deploy
     [ "$status" -eq 0 ]

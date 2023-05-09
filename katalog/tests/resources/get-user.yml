@@ -9,6 +9,7 @@ metadata:
   labels:
     run: get-user
   name: get-user
+  namespace: keycloak
 spec:
   template:
     metadata:
@@ -24,18 +25,24 @@ spec:
             [
               "sh",
               "-c",
-              'apk add jq && curl -s -d "client_id=admin-cli" -d "username=admin" -d "password=admin" -d "grant_type=password" "http://keycloak:8080/auth/realms/master/protocol/openid-connect/token" | jq -r .access_token > /token/current',
+              'apk add jq && curl -s -d "client_id=admin-cli" -d "username=admin" -d "password=${KEYCLOAK_PASSWORD}" -d "grant_type=password" "http://keycloak-service:8080/realms/master/protocol/openid-connect/token" | jq -r .access_token > /token/current',
             ]
           volumeMounts:
             - mountPath: /token
               name: token-volume
+          env:
+            - name: KEYCLOAK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: keycloak-initial-admin
       containers:
         - name: get-user
           command:
             [
               "sh",
               "-c",
-              'apk add jq && curl --fail -s --location "http://keycloak:8080/auth/admin/realms/master/users" --header "Authorization: Bearer $(cat /token/current)" | jq -e -c -r ".[] | select ( .username == \"hello\") "',
+              'apk add jq && curl --fail -s --location "http://keycloak-service:8080/admin/realms/master/users" --header "Authorization: Bearer $(cat /token/current)" | jq -e -c -r ".[] | select ( .username == \"hello\") "',
             ]
           image: registry.sighup.io/fury/curlimages/curl:latest
           resources: {}
