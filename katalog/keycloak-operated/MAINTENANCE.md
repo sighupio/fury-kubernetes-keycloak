@@ -1,7 +1,7 @@
 # `keycloak-operated` Package Maintenance
 
-This package shouldn't change a lot over time, since most of the 
-modifiable configuration is on the `keycloak-operator` package or 
+This package shouldn't change a lot over time, since most of the
+modifiable configuration is on the `keycloak-operator` package or
 it's custom from the implementation side.
 
 ## Configuration

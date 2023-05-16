@@ -3,6 +3,7 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
+# shellcheck disable=SC2086,SC2154,SC2034
 
 load ./resources/helper
 

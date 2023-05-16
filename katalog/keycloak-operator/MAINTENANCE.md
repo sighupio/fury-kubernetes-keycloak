@@ -4,7 +4,7 @@ To prepare a new release of this package:
 
 1. Get the current upstream release and download the resources
 
-Visit https://github.com/keycloak/keycloak-k8s-resources/tags
+Visit [https://github.com/keycloak/keycloak-k8s-resources/tags](https://github.com/keycloak/keycloak-k8s-resources/tags)
 
 ```bash
 export KEYCLOAK_OPERATOR_UPSTREAM_RELEASE=21.1.1

@@ -77,8 +77,7 @@ kustomize build . | kubectl apply -n <your-target-namespace> -f -
 
 > Note: When installing the packages, you need to ensure that the Prometheus operator is also installed.
 > Otherwise, the API server will reject all ServiceMonitor resources.
-
-> Note: When installing the packages, you need to apply twice, in order to make the CRDs available.
+> Also when installing the package you need to apply twice, in order to make the CRDs available.
 
 ### Common Customisations
 
