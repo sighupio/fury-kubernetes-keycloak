@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+# shellcheck disable=SC2086,SC2154,SC2034
+
 apply (){
   kustomize build $1 >&2
   kustomize build $1 | kubectl apply -f - 2>&3
