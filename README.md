@@ -1,49 +1,112 @@
-# Fury Kubernetes KeyCloak
+<h1>
+    <img src="https://github.com/sighupio/fury-distribution/blob/main/docs/assets/fury-epta-white.png?raw=true" align="left" width="90" style="margin-right: 15px"/>
+    Kubernetes Fury Keycloak
+</h1>
 
-This repository has all the files needed to deploy KeyCloak in a High Availability cluster. It is composed by all
-the `keycloak-{number}` pods in the namespace.
+![Release](https://img.shields.io/badge/Latest%20Release-v2.0.0-blue)
+![License](https://img.shields.io/github/license/sighupio/fury-kubernetes-keycloak?label=License)
+![Slack](https://img.shields.io/badge/slack-@kubernetes/fury-yellow.svg?logo=slack&label=Slack)
 
-## KeyCloak Packages
+<!-- <KFD-DOCS> -->
 
-The following packages are included in the Fury Kubernetes KeyCloak Katalog.
+**Kubernetes Fury Keycloak** provides a Keycloak deployment in a High Availability cluster. It is composed by all
+the `keycloak-{number}` pods in the target namespace.
 
-- **[keycloak](#keycloak)**: high availability KeyCloak using native Kubernetes namespace based discovery.
-This will form a KeyCloak cluster where the members will be all the KeyCloaks pods in the same Kubernetes namespace.
-Version: **13.0.1**.
+If you are new to KFD please refer to the [official documentation][kfd-docs] on how to get started with KFD.
 
-## Requirements
+## Packages
 
-All packages in this repository have the following dependencies, for package
-specific dependencies, please visit the single package's documentation:
+The following packages are included in the Fury Kubernetes Keycloak katalog:
 
-- [Kubernetes](https://kubernetes.io) >= `v1.18.0`
-- [Furyctl](https://github.com/sighupio/furyctl) package manager to download
-  Fury packages >= [`v0.2.2`](https://github.com/sighupio/furyctl/releases/tag/v0.2.2)
-- [Kustomize](https://github.com/kubernetes-sigs/kustomize) >= `v3.10.0`
+| Package                                                | Version                         | Description                                                                                 |
+| ------------------------------------------------------ | ------------------------------- | ------------------------------------------------------------------------------------------- |
+| [keycloak-operator](katalog/keycloak-operator)         | `21.1.1`                        | Operator to deploy and manage Keycloak and related resources |
+| [keycloak-operated](katalog/keycloak-operated)         | `21.1.1`                        | High availability KeyCloak using native Kubernetes namespace based discovery. This will form a KeyCloak cluster where the members will be all the KeyCloaks pods in the same Kubernetes namespace.                         |
+
+Click on each package to see its full documentation.
 
 ## Compatibility
 
-| Module Version / Kubernetes Version |       1.18.X       |       1.19.X       |       1.20.X       |  1.21.X   |
-| ----------------------------------- | :----------------: | :----------------: | :----------------: | :-------: |
-| v1.0.0                              |                    |                    |                    |           |
-| v1.0.1                              | :white_check_mark: | :white_check_mark: | :white_check_mark: | :warning: |
-| v1.1.0                              | :white_check_mark: | :white_check_mark: | :white_check_mark: | :warning: |
+| Kubernetes Version |   Compatibility    | Notes           |
+| ------------------ | :----------------: | --------------- |
+| `1.23.x`           | :white_check_mark: | No known issues |
+| `1.24.x`           | :white_check_mark: | No known issues |
+| `1.25.x`           | :white_check_mark: | No known issues |
 
-- :white_check_mark: Compatible
-- :warning: Has issues
-- :x: Incompatible
+## Usage
 
-## Examples
+### Prerequisites
 
-To see examples on how to customize Fury Kubernetes KeyCloak packages, please
-go to [examples](examples) directory.
+| Tool                        | Version   | Description                                                                                                                                                    |
+| --------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [furyctl][furyctl-repo]     | `>=0.6.0` | The recommended tool to download and manage KFD modules and their packages. To learn more about `furyctl` read the [official documentation][furyctl-repo].     |
+| [kustomize][kustomize-repo] | `>=3.5.0` | Packages are customized using `kustomize`. To learn how to create your customization layer with `kustomize`, please refer to the [repository][kustomize-repo]. |
 
-- [`h2-tests`](examples/h2-tests): Use only this option to test KeyCloak. It is used in the E2E tests.
-- [`external-cache`](examples/external-cache): Use this setup to run KeyCloak in a cluster across multiple data
-centers.
-- [`keycloak-4.8.2`](examples/keycloak-4.8.2): You should put your custom modifications to the official docker image
-here.
+### Deployment
+
+1. List the packages in a `Furyfile.yml`
+
+```yaml
+bases:
+  - name: keycloak/keycloak-operator
+    version: "v2.0.0"
+  - name: keycloak/keycloak-operated
+    version: "v2.0.0"
+```
+
+> See `furyctl` [documentation][furyctl-repo] for additional details about `Furyfile.yml` format.
+
+2. Execute `furyctl vendor -H` to download the packages
+
+3. Inspect the download packages under `./vendor/katalog/keycloak`.
+
+4. Define a `kustomization.yaml` that includes the `./vendor/katalog/keycloak` directory as resource.
+
+```yaml
+resources:
+- ./vendor/katalog/keycloak/keycloak-operator
+- ./vendor/katalog/keycloak/keycloak-operated
+```
+
+5. To deploy the packages to your cluster, execute:
+
+```bash
+kubectl create namespace <your-target-namespace>
+kustomize build . | kubectl apply -n <your-target-namespace> -f -
+```
+
+> Note: When installing the packages, you need to ensure that the Prometheus operator is also installed.
+> Otherwise, the API server will reject all ServiceMonitor resources.
+> Also when installing the package you need to apply twice, in order to make the CRDs available.
+
+### Common Customisations
+
+#### Setup an external Database
+
+Keycloak module ships with an internal H2 database, not suggested for a production environment.
+To setup an external database you can refer to [examples/keycloak-operated-deployment](../../examples/keycloak-operated-deployment). The example uses PostgreSQL, but Keycloak also supports MariaDB, MSSQL, MySQL and Oracle.
+
+<!-- Links -->
+
+[kfd-repo]: https://github.com/sighupio/fury-distribution
+[furyctl-repo]: https://github.com/sighupio/furyctl
+[kustomize-repo]: https://github.com/kubernetes-sigs/kustomize
+[kfd-docs]: https://docs.kubernetesfury.com/docs/distribution/
+
+<!-- </KFD-DOCS> -->
+
+<!-- <FOOTER> -->
+
+## Contributing
+
+Before contributing, please read first the [Contributing Guidelines](docs/CONTRIBUTING.md).
+
+### Reporting Issues
+
+In case you experience any problems with the module, please [open a new issue](https://github.com/sighupio/fury-kubernetes-keycloak/issues/new/choose).
 
 ## License
 
-For license details, please see [LICENSE](LICENSE)
+This module is open-source and it's released under the following [LICENSE](LICENSE)
+
+<!-- </FOOTER> -->

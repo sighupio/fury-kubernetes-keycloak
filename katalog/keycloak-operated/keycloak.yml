@@ -1,0 +1,28 @@
+# Copyright (c) 2017-present SIGHUP s.r.l All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+---
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  name: keycloak
+spec:
+  instances: 1
+  http:
+    httpEnabled: true
+  hostname:
+    strict: false
+    strictBackchannel: false
+  ingress:
+    enabled: false
+  unsupported:
+    podTemplate:
+      spec:
+        containers:
+        - name: keycloak
+          env:
+          - name: KC_HEALTH_ENABLED
+            value: "true"
+          - name: KC_METRICS_ENABLED
+            value: "true"
