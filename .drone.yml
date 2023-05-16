@@ -96,7 +96,7 @@ steps:
         path: /shared
     depends_on: [clone]
     settings:
-      action: custom-cluster-123
+      action: cluster-123
       cluster_version: "1.23.6"
       local_kind_config_path: katalog/tests/kind-config.yml
       pipeline_id: cluster-123
@@ -197,7 +197,7 @@ steps:
         path: /shared
     depends_on: [clone]
     settings:
-      action: custom-cluster-124
+      action: cluster-124
       cluster_version: "1.24.0"
       local_kind_config_path: katalog/tests/kind-config.yml
       pipeline_id: cluster-124
@@ -297,7 +297,7 @@ steps:
         path: /shared
     depends_on: [clone]
     settings:
-      action: custom-cluster-125
+      action: cluster-125
       cluster_version: "1.25.3"
       local_kind_config_path: katalog/tests/kind-config.yml
       pipeline_id: cluster-125
