@@ -17,4 +17,4 @@ patchesStrategicMerge:
 images:
   - name: quay.io/keycloak/keycloak-operator
     newName: registry.sighup.io/fury/keycloak/keycloak-operator
-    newTag: 21.1.1
+    newTag: 22.0.1
