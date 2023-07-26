@@ -14,4 +14,4 @@ spec:
         - name: keycloak-operator
           env:
             - name: OPERATOR_KEYCLOAK_IMAGE
-              value: registry.sighup.io/fury/keycloak/keycloak-spi-metrics:21.1.1
+              value: registry.sighup.io/fury/keycloak/keycloak-spi-metrics:22.0.1

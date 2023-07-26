@@ -7,7 +7,7 @@ To prepare a new release of this package:
 Visit [https://github.com/keycloak/keycloak-k8s-resources/tags](https://github.com/keycloak/keycloak-k8s-resources/tags)
 
 ```bash
-export KEYCLOAK_OPERATOR_UPSTREAM_RELEASE=21.1.1
+export KEYCLOAK_OPERATOR_UPSTREAM_RELEASE=22.0.1
 wget -O crds/keycloaks.k8s.keycloak.org-v1.yml https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/${KEYCLOAK_OPERATOR_UPSTREAM_RELEASE}/kubernetes/keycloaks.k8s.keycloak.org-v1.yml
 wget -O crds/keycloakrealmimports.k8s.keycloak.org-v1.yml https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/${KEYCLOAK_OPERATOR_UPSTREAM_RELEASE}/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml
 

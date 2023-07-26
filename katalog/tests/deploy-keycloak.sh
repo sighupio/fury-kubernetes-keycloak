@@ -9,10 +9,18 @@ load ./resources/helper
 
 @test "Applying Monitoring CRDs" {
   info
-  kubectl apply -f https://raw.githubusercontent.com/sighupio/fury-kubernetes-monitoring/v1.14.2/katalog/prometheus-operator/crd-servicemonitor.yml
-  kubectl apply -f https://raw.githubusercontent.com/sighupio/fury-kubernetes-monitoring/v1.14.2/katalog/prometheus-operator/crd-rule.yml
+  kubectl apply --server-side -f https://raw.githubusercontent.com/sighupio/fury-kubernetes-monitoring/v2.1.0/katalog/prometheus-operator/crds/0servicemonitorCustomResourceDefinition.yaml
+  kubectl apply --server-side -f https://raw.githubusercontent.com/sighupio/fury-kubernetes-monitoring/v2.1.0/katalog/prometheus-operator/crds/0prometheusruleCustomResourceDefinition.yaml
 }
 
+@test "Deploy KeyCloak Operator" {
+    info
+    deploy() {
+        apply katalog/keycloak-operator
+    }
+    loop_it deploy 5 5
+    [ "$status" -eq 0 ]
+}
 
 @test "Deploy KeyCloak" {
     info
