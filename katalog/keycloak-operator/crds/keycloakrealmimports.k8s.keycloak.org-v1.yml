@@ -70,6 +70,49 @@ spec:
                           items:
                             type: string
                           type: array
+                        userProfileMetadata:
+                          properties:
+                            attributes:
+                              items:
+                                properties:
+                                  group:
+                                    type: string
+                                  annotations:
+                                    additionalProperties:
+                                      type: object
+                                    type: object
+                                  validators:
+                                    additionalProperties:
+                                      additionalProperties:
+                                        type: object
+                                      type: object
+                                    type: object
+                                  displayName:
+                                    type: string
+                                  readOnly:
+                                    type: boolean
+                                  name:
+                                    type: string
+                                  required:
+                                    type: boolean
+                                type: object
+                              type: array
+                            groups:
+                              items:
+                                properties:
+                                  displayDescription:
+                                    type: string
+                                  annotations:
+                                    additionalProperties:
+                                      type: object
+                                    type: object
+                                  displayHeader:
+                                    type: string
+                                  name:
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
                         createdTimestamp:
                           type: integer
                         emailVerified:
@@ -255,6 +298,49 @@ spec:
                           items:
                             type: string
                           type: array
+                        userProfileMetadata:
+                          properties:
+                            attributes:
+                              items:
+                                properties:
+                                  group:
+                                    type: string
+                                  annotations:
+                                    additionalProperties:
+                                      type: object
+                                    type: object
+                                  validators:
+                                    additionalProperties:
+                                      additionalProperties:
+                                        type: object
+                                      type: object
+                                    type: object
+                                  displayName:
+                                    type: string
+                                  readOnly:
+                                    type: boolean
+                                  name:
+                                    type: string
+                                  required:
+                                    type: boolean
+                                type: object
+                              type: array
+                            groups:
+                              items:
+                                properties:
+                                  displayDescription:
+                                    type: string
+                                  annotations:
+                                    additionalProperties:
+                                      type: object
+                                    type: object
+                                  displayHeader:
+                                    type: string
+                                  name:
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
                         createdTimestamp:
                           type: integer
                         emailVerified:
@@ -2222,13 +2308,10 @@ spec:
               conditions:
                 items:
                   properties:
-                    status:
-                      properties:
-                        value:
-                          type: object
-                      x-kubernetes-preserve-unknown-fields: true
                     lastTransitionTime:
                       type: string
+                    status:
+                      x-kubernetes-preserve-unknown-fields: true
                     observedGeneration:
                       type: integer
                     type:
