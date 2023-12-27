@@ -7,11 +7,11 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   annotations:
-    app.quarkus.io/build-timestamp: 2023-07-18 - 10:05:37 +0000
+    app.quarkus.io/build-timestamp: 2023-10-24 - 10:31:34 +0000
   labels:
     app.kubernetes.io/managed-by: quarkus
+    app.kubernetes.io/version: 22.0.5
     app.kubernetes.io/name: keycloak-operator
-    app.kubernetes.io/version: 22.0.1
   name: keycloak-operator
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -85,6 +85,12 @@ rules:
       - delete
       - patch
       - update
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - list
   - apiGroups:
       - batch
     resources:
@@ -164,10 +170,10 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    app.quarkus.io/build-timestamp: 2023-07-18 - 10:05:37 +0000
+    app.quarkus.io/build-timestamp: 2023-10-24 - 10:31:34 +0000
   labels:
     app.kubernetes.io/name: keycloak-operator
-    app.kubernetes.io/version: 22.0.1
+    app.kubernetes.io/version: 22.0.5
     app.kubernetes.io/managed-by: quarkus
   name: keycloak-operator
 spec:
@@ -178,33 +184,33 @@ spec:
       targetPort: 8080
   selector:
     app.kubernetes.io/name: keycloak-operator
-    app.kubernetes.io/version: 22.0.1
+    app.kubernetes.io/version: 22.0.5
   type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    app.quarkus.io/build-timestamp: 2023-07-18 - 10:05:37 +0000
+    app.quarkus.io/build-timestamp: 2023-10-24 - 10:31:34 +0000
   labels:
     app.kubernetes.io/managed-by: quarkus
+    app.kubernetes.io/version: 22.0.5
     app.kubernetes.io/name: keycloak-operator
-    app.kubernetes.io/version: 22.0.1
   name: keycloak-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
+      app.kubernetes.io/version: 22.0.5
       app.kubernetes.io/name: keycloak-operator
-      app.kubernetes.io/version: 22.0.1
   template:
     metadata:
       annotations:
-        app.quarkus.io/build-timestamp: 2023-07-18 - 10:05:37 +0000
+        app.quarkus.io/build-timestamp: 2023-10-24 - 10:31:34 +0000
       labels:
         app.kubernetes.io/managed-by: quarkus
+        app.kubernetes.io/version: 22.0.5
         app.kubernetes.io/name: keycloak-operator
-        app.kubernetes.io/version: 22.0.1
     spec:
       containers:
         - env:
@@ -212,9 +218,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: OPERATOR_KEYCLOAK_IMAGE
-              value: quay.io/keycloak/keycloak:22.0.1
-          image: quay.io/keycloak/keycloak-operator:22.0.1
+            - name: RELATED_IMAGE_KEYCLOAK
+              value: quay.io/keycloak/keycloak:22.0.5
+          image: quay.io/keycloak/keycloak-operator:22.0.5
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
