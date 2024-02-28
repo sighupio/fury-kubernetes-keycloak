@@ -8,6 +8,7 @@ kind: Keycloak
 metadata:
   name: keycloak
 spec:
+  image: registry.sighup.io/fury/keycloak/keycloak-spi-metrics:22.0.5
   instances: 1
   http:
     httpEnabled: true
