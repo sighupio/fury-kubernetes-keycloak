@@ -20,8 +20,8 @@ The following packages are included in the Fury Kubernetes Keycloak katalog:
 
 | Package                                                | Version                         | Description                                                                                 |
 | ------------------------------------------------------ | ------------------------------- | ------------------------------------------------------------------------------------------- |
-| [keycloak-operator](katalog/keycloak-operator)         | `22.0.5`                        | Operator to deploy and manage Keycloak and related resources |
-| [keycloak-operated](katalog/keycloak-operated)         | `22.0.5`                        | High availability KeyCloak using native Kubernetes namespace based discovery. This will form a KeyCloak cluster where the members will be all the KeyCloaks pods in the same Kubernetes namespace.                         |
+| [keycloak-operator](katalog/keycloak-operator)         | `26.0.2`                        | Operator to deploy and manage Keycloak and related resources |
+| [keycloak-operated](katalog/keycloak-operated)         | `26.0.2`                        | High availability KeyCloak using native Kubernetes namespace based discovery. This will form a KeyCloak cluster where the members will be all the KeyCloaks pods in the same Kubernetes namespace.                         |
 
 Click on each package to see its full documentation.
 
