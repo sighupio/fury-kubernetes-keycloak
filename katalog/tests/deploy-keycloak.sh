@@ -13,10 +13,10 @@ load ./resources/helper
   kubectl apply --server-side -f https://raw.githubusercontent.com/sighupio/fury-kubernetes-monitoring/v2.1.0/katalog/prometheus-operator/crds/0prometheusruleCustomResourceDefinition.yaml
 }
 
-@test "Deploy KeyCloak Operator" {
+@test "Deploy KeyCloak Operator CRDs" {
     info
     deploy() {
-        apply katalog/keycloak-operator
+        kapply katalog/keycloak-operator/crds
     }
     loop_it deploy 5 5
     [ "$status" -eq 0 ]

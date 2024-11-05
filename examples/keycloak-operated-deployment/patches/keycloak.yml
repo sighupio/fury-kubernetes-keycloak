@@ -16,6 +16,7 @@ spec:
     strictBackchannel: false
   ingress:
     enabled: false
+  startOptimized: false
   db:
     vendor: postgres
     host: postgres-db
