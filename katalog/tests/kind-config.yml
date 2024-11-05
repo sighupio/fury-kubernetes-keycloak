@@ -1,0 +1,47 @@
+# Copyright (c) 2020 SIGHUP s.r.l All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+networking:
+  apiServerAddress: "0.0.0.0"
+
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |
+    group: kubeadm.k8s.io
+    version: v1beta1
+    kind: ClusterConfiguration
+    patch: |
+      - op: add
+        path: /apiServer/certSANs/-
+        value: docker
+  - |
+    kind: ClusterConfiguration
+    metadata:
+      name: config
+    etcd:
+      local:
+        extraArgs:
+          "listen-metrics-urls": "http://0.0.0.0:2378"
+    apiServer:
+      extraArgs:
+        "enable-admission-plugins": "NamespaceLifecycle,LimitRanger,PodNodeSelector,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota"
+    controllerManager:
+      extraArgs:
+        "bind-address": "0.0.0.0"
+    scheduler:
+      extraArgs:
+        "bind-address": "0.0.0.0"
+- role: worker
+
+containerdConfigPatches:
+- |-
+    [debug]
+      level = "debug"
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
+          endpoint = ["https://mirror.gcr.io", "https://registry-1.docker.io"]
