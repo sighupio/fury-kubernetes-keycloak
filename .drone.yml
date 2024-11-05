@@ -319,7 +319,7 @@ steps:
         path: /var/run/docker.sock
     depends_on: [clone]
     environment:
-      CLUSTER_VERSION: v1.30.4
+      CLUSTER_VERSION: v1.31.1
       CLUSTER_NAME: ${DRONE_REPO_NAME}-${DRONE_BUILD_NUMBER}-131
       # /drone/src is the default workdir for the pipeline
       # using this folder we don't need to mount another
