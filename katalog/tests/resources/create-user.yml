@@ -33,7 +33,7 @@ spec:
             [
               "sh",
               "-c",
-              'apk add jq && curl -d "client_id=admin-cli" -d "username=admin" -d "password=${KEYCLOAK_PASSWORD}" -d "grant_type=password" "http://keycloak-service:8080/realms/master/protocol/openid-connect/token" | jq -r .access_token > /token/current',
+              'apk add jq && curl -d "client_id=admin-cli" -d "username=temp-admin" -d "password=${KEYCLOAK_PASSWORD}" -d "grant_type=password" "http://keycloak-service:8080/realms/master/protocol/openid-connect/token" | jq -r .access_token > /token/current',
             ]
           volumeMounts:
             - mountPath: /token
